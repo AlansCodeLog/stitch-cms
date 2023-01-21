@@ -1,0 +1,141 @@
+{
+	"name": "stitch-cms",
+	"description": "A tiny custom headless CMS that reads files scattered across any number of folders, resolves/\"stitches\" their links to each other, compiles them to html, then serves them using graphql for consuming however you like.",
+	"version": "0.0.0-semantically-released",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"type": "module",
+	"exports": {
+		".": { "types": "./dist/index.d.ts", "require": "./dist/index.cjs", "import": "./dist/index.js" }
+	},
+	"scripts": {
+		"gen:types": "graphql-codegen-esm --config ./codegen.yml",
+		"dev:serve": "ts-node -r tsconfig-paths/register -T --esm  test.ts",
+		"dev": "nodemon --exec pnpm dev:serve",
+
+		"build": "npm run gen:types && vite build",
+		"build:dev": "pnpm run build --mode development",
+		"build:watch": "pnpm run build --watch --mode production",
+		"build:types": "tsc -p tsconfig.types.json && npm run build:types:fix",
+		"build:types:fix": "tsc-alias -p tsconfig.types.json --debug",
+
+		"lint:eslint": "eslint \"src/**/*.{cjs,js,ts}\" \"*.{cjs,js,ts}\" --max-warnings=0 --report-unused-disable-directives",
+		"lint:types": "tsc --noEmit --pretty",
+		"lint:commits": "commitlint --from $(git rev-list HEAD --not --remotes | tail -1)^ --to HEAD --verbose",
+		"lint:imports": "madge --circular --extensions ts ./src",
+		"lint": "npm run lint:types && npm run lint:eslint",
+
+		"doc": "typedoc --options typedoc.config.cjs",
+		"doc:watch": "onchange -i \"src/**/*.ts\" \"typedoc.config.cjs\" -- npm run doc",
+		"doc:serve": "http-server docs --port=5001",
+		"doc:dev": "concurrently \"npm run doc:watch\" \"npm run doc:serve\"",
+		"doc:check-invalid": "typedoc --options typedoc.config.cjs --listInvalidSymbolLinks",
+
+		"actions:debug": "act -r -v -j build-only",
+		"gen:exports": "indexit update -o '${path}.js'",
+		"prepare": "husky install && npm run build"
+	},
+	"nodemonConfig": {
+		"events": {
+			"crash": "fuser -k 4000/tcp",
+			"start": "fuser -k 4000/tcp"
+		},
+		"ext": "js,ts,json,gql,md",
+		"watch": [
+			"src/**/*",
+			"data/**/*.md"
+		]
+	},
+	"dependencies": {
+		"@alanscodelog/utils": "^4.0.0-beta.4",
+		"@extractus/oembed-extractor": "^3.1.8",
+		"apollo-datasource": "^3.3.2",
+		"apollo-server-caching": "^3.3.0",
+		"apollo-server-express": "^3.11.1",
+		"apollo-server": "^3.11.1",
+		"chokidar": "^3.5.3",
+		"core-js": "^3.27.1",
+		"dotenv": "^16.0.3",
+		"graphql": "^16.6.0",
+		"nodemon": "^2.0.20",
+		"picomatch": "^2.3.1",
+		"pino-pretty": "^9.1.1",
+		"pino": "^8.8.0",
+		"prismjs": "1.29.0",
+		"rehype-katex": "^6.0.2",
+		"rehype-parse": "^8.0.4",
+		"rehype-remark": "^9.1.2",
+		"rehype-stringify": "^9.0.3",
+		"remark-frontmatter": "^4.0.1",
+		"remark-gfm": "^3.0.1",
+		"remark-math": "^5.1.1",
+		"remark-parse": "^10.0.1",
+		"remark-prism": "^1.3.6",
+		"remark-rehype": "^10.1.0",
+		"sharp": "0.31.3",
+		"ts-node": "^10.9.1",
+		"unified": "^10.1.2",
+		"unist-util-is": "^5.1.1",
+		"unist-util-visit": "^4.1.1",
+		"vfile": "^5.3.6",
+		"yaml": "^2.2.1"
+	},
+	"devDependencies": {
+		"@alanscodelog/commitlint-config": "^2.0.0",
+		"@alanscodelog/eslint-config": "^4.0.1",
+		"@alanscodelog/semantic-release-config": "^2.0.1",
+		"@alanscodelog/tsconfigs": "^3.1.3",
+		"@babel/core": "^7.20.7",
+		"@babel/plugin-transform-runtime": "^7.19.6",
+		"@babel/preset-env": "^7.20.2",
+		"@babel/runtime": "^7.20.7",
+		"@graphql-codegen/add": "^3.2.3",
+		"@graphql-codegen/cli": "^2.16.4",
+		"@graphql-codegen/typescript-resolvers": "^2.7.12",
+		"@graphql-codegen/typescript": "^2.8.7",
+		"@rollup/plugin-babel": "^6.0.3",
+		"@types/node": "^18.11.18",
+		"@types/picomatch": "^2.3.0",
+		"@types/prismjs": "1.26.0",
+		"@types/remark-prism": "^1.3.4",
+		"@types/sharp": "^0.31.1",
+		"@typescript-eslint/eslint-plugin": "^5.48.2",
+		"@typescript-eslint/parser": "^5.48.2",
+		"commitlint": "^17.3.0",
+		"concurrently": "^7.6.0",
+		"cross-env": "^7.0.3",
+		"eslint-import-resolver-typescript": "^3.5.3",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-jsdoc": "^39.6.7",
+		"eslint-plugin-simple-import-sort": "^9.0.0",
+		"eslint": "^8.32.0",
+		"fast-glob":"^3.2.12",
+		"husky":"^8.0.3",
+		"indexit":"^2.1.0-beta.3",
+		"madge":"^5.0.1",
+		"onchange": "^7.1.0",
+		"tsc-alias":"^1.8.2",
+		"tsconfig-paths": "^4.1.2",
+		"typedoc":"^0.23.24",
+		"typescript": "^4.9.4",
+		"vite-tsconfig-paths": "^4.0.5",
+		"vite": "^4.0.4"
+	},
+	"author": "Alan <alanscodelog@gmail.com>",
+	"repository": "https://github.com/alanscodelog/stitch-cms",
+	"license": "MIT",
+	"files": [
+		"src",
+		"dist"
+	],
+	"release": { "extends": [ "@alanscodelog/semantic-release-config" ] },
+	"commitlint": { "extends": [ "@alanscodelog" ] },
+	"browserslist":"maintained node versions",
+	"engines": { "node": ">=14.0.0" },
+	"@comments": {
+		"scripts": {
+			"prepare": "Needed so that if we pull the package from git it will get built and installed properly.","actions:debug": "For debugging github build action locally with nektos/act. Requires act and docker. Note: Cache will never work locally because of https: //github.com/nektos/act/issues/285"
+		}
+	}
+}
